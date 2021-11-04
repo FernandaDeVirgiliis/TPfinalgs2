@@ -13,7 +13,7 @@ class programa:
 
         #Frame
         frame=LabelFrame(self.wind,text='Registro de empleados')
-        frame.grid(row=0,column=o,columnspan=3,pady=20)
+        frame.grid(row=0,column=0,columnspan=3,pady=20)
 
         Label(frame,text="Legajo: ").grid(row=1,column=0)
         self.legajo=Entry(frame)
@@ -52,6 +52,6 @@ class programa:
 
 if __name__ == '__main__':
     window = Tk()
-    programa = app(window)
+    Aplicacion = programa(window)
     window.mainloop()
         
