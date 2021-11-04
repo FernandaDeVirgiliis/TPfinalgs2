@@ -3,13 +3,12 @@ from tkinter import *
 
 import sqlite3
 
-
-
-
 class programa:
-    def _init_(self,window):
-        self.wind=window
-        self.wind.tittle("Programa CRUD")
+
+    def __init__(self,window):
+        
+        self.wind = window
+        self.wind.title("Programa CRUD")
 
         #Frame
         frame=LabelFrame(self.wind,text='Registro de empleados')
