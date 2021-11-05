@@ -1,7 +1,7 @@
 #Importaciones
 from tkinter import ttk
 from tkinter import *
-
+from tkinter import messagebox
 import sqlite3
 
 class programa:
@@ -13,6 +13,7 @@ class programa:
         '''Objeto constructor'''
         
         self.wind = window
+        self.wind.geometry("850x300")
         self.wind.title("Programa CRUD")
 
         #Frames
@@ -37,9 +38,8 @@ class programa:
 
         #botones
         ttk.Button(frame,text="Registrar",command=self.registrar).grid(row=5,column=0)
-        ttk.Button(frame,text="Mostrar").grid(row=5,column=2)
-        ttk.Button(frame,text="Modificar").grid(row=5,column=4)
-        ttk.Button(frame,text="Eliminar").grid(row=5,column=6)
+        ttk.Button(frame,text="Modificar").grid(row=5,column=3)
+        ttk.Button(frame,text="Eliminar",comman=self.eliminar).grid(row=5,column=6)
 
         #Creacion de tablas
         self.tree=ttk.Treeview(height=10, columns=('#1','#2','#3'))
@@ -60,6 +60,11 @@ class programa:
         return result
 
     def get_empleados(self):
+        # Limpio la tabla antes de arrancar la query
+        elementos = self.tree.get_children()
+        for element in elementos:
+            self.tree.delete(element)
+        
         #consulta de datos
         query = 'SELECT * FROM empleados'
         db_rows=self.run_query(query)
@@ -79,11 +84,38 @@ class programa:
             queryInsert ='INSERT INTO empleados VALUES(?,?,?,?)'
             parameters=(self.legajo.get(),self.nombre.get(),self.puesto.get(),self.sucursal.get())
             execute = self.run_query(queryInsert,parameters)
-            print("Empleado registrado")    
+            messagebox.showinfo(message="Empleado registrado", title="Registrado")    
         else:
-            print("Inserte datos")
+            messagebox.showwarning(message="Ingresar datos", title="Precaución")
         #Vuelvo a mostrar a los empleados
         self.get_empleados()
+
+    #Funcion actualizar
+
+    #Funcion eliminar
+    def eliminar(self):
+        '''Ésta función sirve para eliminar a un empleado existente'''
+        try:
+            self.tree.item(self.tree.selection())['text']
+        except IndexError: 
+            messagebox.showwarning(message="Selecciona un empleado", title="Aviso")
+            return
+        nombredelete = self.tree.item(self.tree.selection())['text']
+        querydelete='DELETE FROM empleados WHERE Legajo = ?'
+        self.run_query(querydelete, (nombredelete, ))
+        messagebox.showinfo(message="Empleado eliminado", title="Eliminar")
+        
+        self.get_empleados()
+         
+
+
+
+
+
+
+
+    #Filtro
+    #Informe
 
 if __name__ == '__main__':
     window = Tk()
