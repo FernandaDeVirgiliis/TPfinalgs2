@@ -2,7 +2,10 @@
 from tkinter import ttk
 from tkinter import *
 from tkinter import messagebox
+from tkinter.ttk import Combobox
+
 import sqlite3
+from repositorio_empleados import repositorio_empleados
 
 class programa:
 
@@ -11,10 +14,10 @@ class programa:
 
     def __init__(self,window):
         '''Objeto constructor'''
-        
         self.wind = window
         self.wind.geometry("850x300")
         self.wind.title("Programa CRUD")
+
 
         #Frames
         frame=LabelFrame(self.wind,text='Registro de empleados')
@@ -28,28 +31,40 @@ class programa:
         self.nombre=Entry(frame)
         self.nombre.grid(row=2,column=4)
         
+
         Label(frame,text="Puesto: ").grid(row=3,column=0)
-        self.puesto=Entry(frame)
+        self.puesto=ttk.Combobox(frame,width=17)
         self.puesto.grid(row=3,column=1)
+        opciones=["Operativo","Administrativo","Gerencial"]
+        self.puesto['values']=opciones
+        
+        
 
         Label(frame,text="Sucursal: ").grid(row=3,column=3)
         self.sucursal=Entry(frame)
         self.sucursal.grid(row=3,column=4)
 
+        
+
         #botones
         ttk.Button(frame,text="Registrar",command=self.registrar).grid(row=5,column=0)
-        ttk.Button(frame,text="Modificar").grid(row=5,column=3)
-        ttk.Button(frame,text="Eliminar",comman=self.eliminar).grid(row=5,column=6)
+        ttk.Button(frame,text="Modificar",command=self.actualizar).grid(row=5,column=3)
+        ttk.Button(frame,text="Eliminar",command=self.eliminar).grid(row=5,column=6)
+        
 
         #Creacion de tablas
         self.tree=ttk.Treeview(height=10, columns=('#1','#2','#3'))
-        self.tree.place(x=0, y=120)
+        self.tree.place(x=0, y=250)
         self.tree.heading('#0', text="Legajo", anchor=CENTER)
         self.tree.heading('#1', text="Nombre", anchor=CENTER)
         self.tree.heading('#2', text="Puesto", anchor=CENTER)
         self.tree.heading('#3', text="Sucursal", anchor=CENTER)
 
         self.get_empleados()
+
+    def get_seleccion(self):
+        # Limpio la tabla antes de arrancar la query
+        print (self.opcion.get())
 
     def run_query(self,query,parameters=()):
         '''Esta funcion realiza una conexión y consulta con la BBDD'''
@@ -72,51 +87,7 @@ class programa:
         for row in db_rows:
             self.tree.insert('', 0, text = (row[0]), values = (row[1],row[2], row[3]))
                 
-    def registrar(self):
-        '''Esta funcion sirve para registrar a un nuevo empleado'''
-        Legajo=self.legajo.get()
-        Nombre=self.nombre.get()
-        Puesto=self.puesto.get()
-        Sucursal=self.sucursal.get()
-
-	#Ejecuto la query	
-        if(Legajo !=''and Nombre !='' and Puesto !='' and Sucursal !=''):
-            queryInsert ='INSERT INTO empleados VALUES(?,?,?,?)'
-            parameters=(self.legajo.get(),self.nombre.get(),self.puesto.get(),self.sucursal.get())
-            execute = self.run_query(queryInsert,parameters)
-            messagebox.showinfo(message="Empleado registrado", title="Registrado")    
-        else:
-            messagebox.showwarning(message="Ingresar datos", title="Precaución")
-        #Vuelvo a mostrar a los empleados
-        self.get_empleados()
-
-    #Funcion actualizar
-
-    #Funcion eliminar
-    def eliminar(self):
-        '''Ésta función sirve para eliminar a un empleado existente'''
-        try:
-            self.tree.item(self.tree.selection())['text']
-        except IndexError: 
-            messagebox.showwarning(message="Selecciona un empleado", title="Aviso")
-            return
-        nombredelete = self.tree.item(self.tree.selection())['text']
-        querydelete='DELETE FROM empleados WHERE Legajo = ?'
-        self.run_query(querydelete, (nombredelete, ))
-        messagebox.showinfo(message="Empleado eliminado", title="Eliminar")
-        
-        self.get_empleados()
-         
-
-
-
-
-
-
-
-    #Filtro
-    #Informe
-
+    
 if __name__ == '__main__':
     window = Tk()
     Aplicacion = programa(window)
