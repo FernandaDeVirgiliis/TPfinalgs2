@@ -17,6 +17,22 @@ class programa:
         self.wind.geometry("850x300")
         self.wind.title("Programa CRUD")
         self.repositorio = RepositorioEmpleados()
+      
+
+        #Menu
+        menubar=Menu(self.wind)
+        menubasedat=Menu(menubar, tearoff=0)
+        ayudamenu=Menu(menubar, tearoff=0)
+        ayudamenu.add_command(label="Limpiar campos", command='')
+
+        menubar.add_cascade(label="Ayuda", menu=ayudamenu)
+
+        buscar=Menu(menubar, tearoff=0)
+        buscar.add_command(label="Buscar por nombre", command='')
+
+        menubar.add_cascade(label="Filtrar", menu=buscar)
+
+        self.wind.config(menu=menubar)
         
         #Frames
         frame=LabelFrame(self.wind,text='Registro de empleados')
@@ -43,10 +59,9 @@ class programa:
         self.sucursal.grid(row=3,column=4)
 
         
-
         #botones
         ttk.Button(frame,text="Registrar",command=self.agregar_empleado).grid(row=5,column=0)
-        ttk.Button(frame,text="Modificar",command=self.editar_empleado).grid(row=5,column=3)
+        ttk.Button(frame,text="Modificar",command=self.ventana_editar_empleado).grid(row=5,column=3)
         ttk.Button(frame,text="Eliminar",command=self.eliminar_empleado).grid(row=5,column=6)
         
 
@@ -99,11 +114,60 @@ class programa:
         self.get_empleados()
         return parametros
 
-    def editar_empleado(self):
+    def ventana_editar_empleado(self):
+        '''Ventana para editar un empleado'''
+        try:
+            self.tree.item(self.tree.selection())['text']
+        except IndexError:
+            # cambiar por ventana de error(show warning) -> self.message['text'] = 'Por favor, seleccione un registro'
+            return
+        legajo = self.tree.item(self.tree.selection())['text']
+        nombre_anterior = self.tree.item(self.tree.selection())['values'][0]
+        puesto_anterior = self.tree.item(self.tree.selection())['values'][1]
+        sucursal_anterior = self.tree.item(self.tree.selection())['values'][2]
+        self.ventana_edicion = Toplevel()
+        self.ventana_edicion.title = 'Editar cliente'
+
+        # Legajo
+        Label(self.ventana_edicion, text = 'Legajo: ').grid(row = 0, column = 0)
+        Entry(self.ventana_edicion, textvariable = StringVar(self.ventana_edicion, value = legajo), state = 'readonly').grid(row = 0, column = 1)
+
+        # Nombre anterior
+        Label(self.ventana_edicion, text = 'Nombre anterior: ').grid(row = 2, column = 0)
+        Entry(self.ventana_edicion, textvariable = StringVar(self.ventana_edicion, value = nombre_anterior), state = 'readonly').grid(row = 2, column = 1)
+
+        # Nombre actual
+        Label(self.ventana_edicion, text = 'Nombre actual: ').grid(row = 3, column = 0)
+        nuevo_nombre = Entry(self.ventana_edicion)
+        nuevo_nombre.grid(row = 3, column = 1)
+
+        # Puesto anterior
+        Label(self.ventana_edicion, text = 'Puesto anterior: ').grid(row = 4, column = 0)
+        Entry(self.ventana_edicion, textvariable = StringVar(self.ventana_edicion, value = puesto_anterior), state = 'readonly').grid(row = 4, column = 1)
+
+        # Puesto nuevo
+        Label(self.ventana_edicion, text = 'Puesto actual: ').grid(row = 5, column = 0)
+        nuevo_puesto = Entry(self.ventana_edicion)
+        nuevo_puesto.grid(row = 5, column = 1)
+
+        # Sucursal anterior
+        Label(self.ventana_edicion, text = 'Sucursal anterior: ').grid(row = 6, column = 0)
+        Entry(self.ventana_edicion, textvariable = StringVar(self.ventana_edicion, value = sucursal_anterior), state = 'readonly').grid(row = 6, column = 1)
+
+        # Sucursal actual
+        Label(self.ventana_edicion, text = 'Sucursal actual: ').grid(row = 7, column = 0)
+        nueva_sucursal = Entry(self.ventana_edicion)
+        nueva_sucursal.grid(row = 7, column = 1)
+
+        # Botón de guardar cambios
+        ttk.Button(self.ventana_edicion,text ='Actualizar',command=lambda:self.editar_empleado(legajo,nuevo_nombre.get(),nuevo_puesto.get(),nueva_sucursal.get())).grid(row=8,column=0)
+
+    #Funcion editar
+    def editar_empleado(self,legajo,nuevo_nombre,nuevo_puesto,nueva_sucursal):
         '''Esta funcion sirve para editar a un empleado'''
-        parametros = Empleados(self.legajo.get(),self.nombre.get(),self.puesto.get(),self.sucursal.get())
+        parametros = Empleados(legajo,nuevo_nombre,nuevo_puesto,nueva_sucursal)
         print (parametros)
-        parametrito = self.repositorio.registrar(parametros)
+        parametrito = self.repositorio.actualizar(parametros)
         print (parametrito)
         if parametrito:
             messagebox.showinfo(message="Empleado registrado", title="Registrado")
@@ -112,6 +176,7 @@ class programa:
 
         self.get_empleados()
         return parametros
+    
 
     #Funcion eliminar
     def eliminar_empleado(self):
@@ -134,7 +199,7 @@ class programa:
                 
     
 if __name__ == '__main__':
-    window = Tk()
+    window= Tk()
     Aplicacion = programa(window)
     window.mainloop()
         

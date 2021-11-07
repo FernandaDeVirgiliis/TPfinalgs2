@@ -19,21 +19,17 @@ class RepositorioEmpleados:
             return 0
 
     #Funcion actualizar
-    def actualizar(self):
+    def actualizar(self, Empleados):
         '''Ésta función sirve para actualizar a un empleado existente'''
         try:
-            self.tree.item(self.tree.selection())['text']
-        except IndexError: 
-            messagebox.showwarning(message="Selecciona un empleado", title="Aviso")
-            return
-        
-        nombreupdate = self.tree.item(self.tree.selection())['text']
-        queryupdate='UPDATE empleados SET Legajo = ?, Nombre = ?, Puesto = ?, Sucursal = ?'
-        self.run_query(queryupdate, (nombreupdate, ))
-        messagebox.showinfo(message="Empleado actualizado", title="Actualizar")
-
-        	
-        self.get_empleados()
+        #Ejecuto la query	
+            query = 'UPDATE empleados SET Nombre = ?, Puesto = ?, Sucursal = ? WHERE Legajo = ?'
+            execute = self.cursor.execute(query,[Empleados.nombre,Empleados.puesto,Empleados.sucursal,Empleados.legajo])
+            self.bd.commit()
+            return 1
+        except:
+            self.bd.rollback()
+            return 0
         
     #Funcion eliminar
     def eliminar(self, Empleados):
