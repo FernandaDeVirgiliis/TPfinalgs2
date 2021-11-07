@@ -1,62 +1,49 @@
-class repositorio_empleados:
-    
-    def registrar(self):
-        '''Esta funcion sirve para registrar a un nuevo empleado'''
-        Legajo=self.legajo.get()
-        Nombre=self.nombre.get()
-        Puesto=self.puesto.get()
-        Sucursal=self.sucursal.get()
+from empleado import Empleados
+import sqlite3
 
-	#Ejecuto la query	
-        if(Legajo !=''and Nombre !='' and Puesto !='' and Sucursal !=''):
-            queryInsert ='INSERT INTO empleados VALUES(?,?,?,?)'
-            parameters=(self.legajo.get(),self.nombre.get(),self.puesto.get(),self.sucursal.get())
-            execute = self.run_query(queryInsert,parameters)
-            messagebox.showinfo(message="Empleado registrado", title="Registrado")    
-        else:
-            messagebox.showwarning(message="Ingresar datos", title="Precaución")
-        #Vuelvo a mostrar a los empleados
-        self.get_empleados()
+class RepositorioEmpleados:
+
+    def __init__(self):
+        self.bd = sqlite3.connect("bd.db")
+        self.cursor = self.bd.cursor()
+    
+    def registrar(self, Empleados):
+        try:
+            #Ejecuto la query	
+            query = 'INSERT INTO empleados VALUES(?,?,?,?)'
+            execute = self.cursor.execute(query,[Empleados.legajo,Empleados.nombre,Empleados.puesto,Empleados.sucursal])
+            self.bd.commit()
+            return 1
+        except:
+            self.bd.rollback()
+            return 0
 
     #Funcion actualizar
     def actualizar(self):
-        '''Esta función sirve para modificar un empleado existente'''
+        '''Ésta función sirve para actualizar a un empleado existente'''
         try:
             self.tree.item(self.tree.selection())['text']
         except IndexError: 
             messagebox.showwarning(message="Selecciona un empleado", title="Aviso")
             return
-        Legajoedit=self.tree.item(self.tree.selection())['text']
         
-        
+        nombreupdate = self.tree.item(self.tree.selection())['text']
+        queryupdate='UPDATE empleados SET Legajo = ?, Nombre = ?, Puesto = ?, Sucursal = ?'
+        self.run_query(queryupdate, (nombreupdate, ))
+        messagebox.showinfo(message="Empleado actualizado", title="Actualizar")
 
+        	
+        self.get_empleados()
+        
     #Funcion eliminar
-    def eliminar(self):
+    def eliminar(self, Empleados):
         '''Ésta función sirve para eliminar a un empleado existente'''
         try:
-            self.tree.item(self.tree.selection())['text']
-        except IndexError: 
-            messagebox.showwarning(message="Selecciona un empleado", title="Aviso")
-            return
-        nombredelete = self.tree.item(self.tree.selection())['text']
-        querydelete='DELETE FROM empleados WHERE Legajo = ?'
-        self.run_query(querydelete, (nombredelete, ))
-        messagebox.showinfo(message="Empleado eliminado", title="Eliminar")
-        
-        self.get_empleados()
-         
-
-
-
-
-
-
-
-    #Filtro
-    #Informe
-
-if __name__ == '__main__':
-    window = Tk()
-    Aplicacion = programa(window)
-    window.mainloop()
+            query = 'DELETE FROM empleados WHERE Legajo = ?'
+            execute = self.cursor.execute(query,[Empleados.legajo])
+            self.bd.commit()
+            return 1
+        except:
+            self.bd.rollback()
+            return 0
         

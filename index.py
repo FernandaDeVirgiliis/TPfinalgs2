@@ -3,12 +3,11 @@ from tkinter import ttk
 from tkinter import *
 from tkinter import messagebox
 from tkinter.ttk import Combobox
-
+from empleado import Empleados
+from repositorio_empleados import RepositorioEmpleados
 import sqlite3
-from repositorio_empleados import repositorio_empleados
 
 class programa:
-
     #Defino el nombre de la base de datos
     base_nombre='bd.db'
 
@@ -17,8 +16,8 @@ class programa:
         self.wind = window
         self.wind.geometry("850x300")
         self.wind.title("Programa CRUD")
-
-
+        self.repositorio = RepositorioEmpleados()
+        
         #Frames
         frame=LabelFrame(self.wind,text='Registro de empleados')
         frame.grid(row=0,column=0,columnspan=5,pady=30)
@@ -38,8 +37,7 @@ class programa:
         opciones=["Operativo","Administrativo","Gerencial"]
         self.puesto['values']=opciones
         
-        
-
+    
         Label(frame,text="Sucursal: ").grid(row=3,column=3)
         self.sucursal=Entry(frame)
         self.sucursal.grid(row=3,column=4)
@@ -47,9 +45,9 @@ class programa:
         
 
         #botones
-        ttk.Button(frame,text="Registrar",command=self.registrar).grid(row=5,column=0)
-        ttk.Button(frame,text="Modificar",command=self.actualizar).grid(row=5,column=3)
-        ttk.Button(frame,text="Eliminar",command=self.eliminar).grid(row=5,column=6)
+        ttk.Button(frame,text="Registrar",command=self.agregar_empleado).grid(row=5,column=0)
+        ttk.Button(frame,text="Modificar",command=self.editar_empleado).grid(row=5,column=3)
+        ttk.Button(frame,text="Eliminar",command=self.eliminar_empleado).grid(row=5,column=6)
         
 
         #Creacion de tablas
@@ -86,6 +84,53 @@ class programa:
         # Insertar la consulta dentro de la tabla
         for row in db_rows:
             self.tree.insert('', 0, text = (row[0]), values = (row[1],row[2], row[3]))
+
+    def agregar_empleado(self):
+        '''Esta funcion sirve para registrar a un nuevo empleado'''
+        parametros = Empleados(self.legajo.get(),self.nombre.get(),self.puesto.get(),self.sucursal.get())
+        print (parametros)
+        parametrito = self.repositorio.registrar(parametros)
+        print (parametrito)
+        if parametrito:
+            messagebox.showinfo(message="Empleado registrado", title="Registrado")
+        else:
+            messagebox.showwarning(message="Error en la base de datos", title="Precaución")
+
+        self.get_empleados()
+        return parametros
+
+    def editar_empleado(self):
+        '''Esta funcion sirve para editar a un empleado'''
+        parametros = Empleados(self.legajo.get(),self.nombre.get(),self.puesto.get(),self.sucursal.get())
+        print (parametros)
+        parametrito = self.repositorio.registrar(parametros)
+        print (parametrito)
+        if parametrito:
+            messagebox.showinfo(message="Empleado registrado", title="Registrado")
+        else:
+            messagebox.showwarning(message="Error en la base de datos", title="Precaución")
+
+        self.get_empleados()
+        return parametros
+
+    #Funcion eliminar
+    def eliminar_empleado(self):
+        '''Ésta función sirve para eliminar a un empleado existente'''
+        legajo = self.tree.item(self.tree.selection())['text']
+        nombre = self.tree.item(self.tree.selection())['values'][0]
+        puesto = self.tree.item(self.tree.selection())['values'][1]
+        sucursal = self.tree.item(self.tree.selection())['values'][2]
+        try:
+            self.tree.item(self.tree.selection())['text']
+        except IndexError: 
+            messagebox.showwarning(message="Selecciona un empleado", title="Aviso")
+            return
+        parametro = Empleados(legajo,nombre,puesto,sucursal)
+        self.repositorio.eliminar(parametro)
+        messagebox.showinfo(message="Empleado eliminado", title="Eliminar")
+        self.get_empleados()
+
+
                 
     
 if __name__ == '__main__':
