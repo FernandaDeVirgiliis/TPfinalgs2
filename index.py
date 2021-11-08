@@ -16,21 +16,20 @@ class programa:
         self.wind = window
         self.wind.geometry("850x300")
         self.wind.title("Programa CRUD")
-        self.repositorio = RepositorioEmpleados()
+        self.repositorio = RepositorioEmpleados()        
       
-
         #Menu
         menubar=Menu(self.wind)
         menubasedat=Menu(menubar, tearoff=0)
         ayudamenu=Menu(menubar, tearoff=0)
-        ayudamenu.add_command(label="Limpiar campos", command='')
-
-        menubar.add_cascade(label="Ayuda", menu=ayudamenu)
+        ayudamenu.add_command(label="Salir", command=self.salirPrograma)
+        
+        menubar.add_cascade(label="Menu", menu=ayudamenu)
 
         buscar=Menu(menubar, tearoff=0)
-        buscar.add_command(label="Buscar por nombre", command='')
+        buscar.add_command(label="Buscar por nombre")
 
-        menubar.add_cascade(label="Filtrar", menu=buscar)
+        menubar.add_cascade(label="Filtrar", menu=buscar, command=self.filtro)
 
         self.wind.config(menu=menubar)
         
@@ -61,8 +60,9 @@ class programa:
         
         #botones
         ttk.Button(frame,text="Registrar",command=self.agregar_empleado).grid(row=5,column=0)
-        ttk.Button(frame,text="Modificar",command=self.ventana_editar_empleado).grid(row=5,column=3)
-        ttk.Button(frame,text="Eliminar",command=self.eliminar_empleado).grid(row=5,column=6)
+        ttk.Button(frame,text="Modificar",command=self.ventana_editar_empleado).grid(row=5,column=2)
+        ttk.Button(frame,text="Eliminar",command=self.eliminar_empleado).grid(row=5,column=4)
+        ttk.Button(frame,text="Informe",command=self.get_all_children).grid(row=5,column=6)
         
 
         #Creacion de tablas
@@ -74,7 +74,6 @@ class programa:
         self.tree.heading('#3', text="Sucursal", anchor=CENTER)
 
         self.get_empleados()
-
     def get_seleccion(self):
         # Limpio la tabla antes de arrancar la query
         print (self.opcion.get())
@@ -119,14 +118,15 @@ class programa:
         try:
             self.tree.item(self.tree.selection())['text']
         except IndexError:
-            # cambiar por ventana de error(show warning) -> self.message['text'] = 'Por favor, seleccione un registro'
+            
+            messagebox.showwarning(message="Seleccione un empleado", title="Precaución")                            
             return
         legajo = self.tree.item(self.tree.selection())['text']
         nombre_anterior = self.tree.item(self.tree.selection())['values'][0]
         puesto_anterior = self.tree.item(self.tree.selection())['values'][1]
         sucursal_anterior = self.tree.item(self.tree.selection())['values'][2]
         self.ventana_edicion = Toplevel()
-        self.ventana_edicion.title = 'Editar cliente'
+        self.ventana_edicion.title = 'Editar empleado'
 
         # Legajo
         Label(self.ventana_edicion, text = 'Legajo: ').grid(row = 0, column = 0)
@@ -195,7 +195,33 @@ class programa:
         messagebox.showinfo(message="Empleado eliminado", title="Eliminar")
         self.get_empleados()
 
+    #Salir del programa
+    def salirPrograma(self):
+        valor=messagebox.askquestion("Salir","¿Desea salir?")
+        if valor=="yes":
+            self.wind.destroy()
+        else:
+            ""
 
+    #informe
+    def get_all_children(self):
+        item_count = len(self.tree.get_children())
+        self.ventana_informe = Toplevel()
+        Label(self.ventana_informe, text = item_count).grid(row=0,column=1)
+        Label(self.ventana_informe, text = 'Cantidad de empleados:').grid(row = 0, column = 0)
+   
+
+    #Filtro
+    def filtro(self):
+        nombre_empleado = self.buscar.get()
+        nombre_empleado = str("'"+nombre_empleado+"'")
+        nombre_buscado= self.bd.db.busca_nombre(nombre_empleado)
+        self.empleados.delete(*self.empleados.get_children())
+        i= i-1
+        for dato in registro:
+            i= i+1
+            self.empleados.insert('',i,text=registro[i][1:2],values=nombre_buscado[i][2:6])
+    
                 
     
 if __name__ == '__main__':
